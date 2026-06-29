@@ -29,4 +29,8 @@ public class AuthController {
 
         return ResponseEntity.ok(responseDto);
     }
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("JWT works");
+    }
 }

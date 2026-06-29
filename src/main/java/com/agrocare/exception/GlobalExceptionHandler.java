@@ -14,4 +14,12 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<String> handlerInvalidCredentials(InvalidCredentialsException exception){
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(exception.getMessage());
+    }
+
+
 }

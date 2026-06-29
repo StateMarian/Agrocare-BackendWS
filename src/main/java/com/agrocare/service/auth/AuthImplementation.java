@@ -5,9 +5,11 @@ import com.agrocare.dto.auth.LoginRequestDto;
 import com.agrocare.dto.auth.RegisterRequestDto;
 import com.agrocare.entity.Role;
 import com.agrocare.entity.Users;
+import com.agrocare.exception.InvalidCredentialsException;
 import com.agrocare.exception.ResourceAlreadyExistsException;
 import com.agrocare.repository.RoleRepository;
 import com.agrocare.repository.UserRepository;
+import com.agrocare.service.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class AuthImplementation implements AuthService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public AuthResponseDto register(RegisterRequestDto dto) {
@@ -57,14 +60,16 @@ public class AuthImplementation implements AuthService{
 
     @Override
     public AuthResponseDto login(LoginRequestDto dto){
-        Users user  = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        Users user  = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
         if(!passwordEncoder.matches(dto.getPassword(), user.getPassword())){
-            throw  new RuntimeException("Invalid email or password");
+            throw  new InvalidCredentialsException("Invalid email or password");
         }
 
+        String token = jwtService.generateToken(user.getEmail());
         return AuthResponseDto.builder()
                 .message("Login successfully")
+                .token(token)
                 .email(user.getEmail())
                 .role(user.getRole().getRoleName())
                 .build();
